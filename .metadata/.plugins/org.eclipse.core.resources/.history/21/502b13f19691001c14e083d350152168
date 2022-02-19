@@ -1,0 +1,11 @@
+package com.AccessModifiers1.java;
+
+import com.AccessModifiers.java.*;
+public class ProtectedDemo 
+
+	public static void main(String[] args) {
+		
+
+	}
+
+}

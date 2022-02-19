@@ -1,0 +1,10 @@
+package com.AccessModifiers.java;
+
+public class DefaultDemo {
+	public static void main(String[] args) {
+		C c = new C();
+		System.out.println(c.a);
+		System.out.println("Default access modifier operation done");
+	}
+
+}
