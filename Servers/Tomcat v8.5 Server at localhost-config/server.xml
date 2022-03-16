@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+--><!-- Note:  A "Server" is not itself a "Container", so you may not
+     define subcomponents such as "Valves" at this level.
+     Documentation at /docs/config/server.html
+ --><Server port="8006" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener"/>
+  <!-- Security listener. Documentation at /docs/config/listeners.html
+  <Listener className="org.apache.catalina.security.SecurityListener" />
+  -->
+  <!-- APR library loader. Documentation at /docs/apr.html -->
+  <Listener SSLEngine="on" className="org.apache.catalina.core.AprLifecycleListener"/>
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener"/>
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener"/>
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener"/>
+
+  <!-- Global JNDI resources
+       Documentation at /docs/jndi-resources-howto.html
+  -->
+  <GlobalNamingResources>
+    <!-- Editable user database that can also be used by
+         UserDatabaseRealm to authenticate users
+    -->
+    <Resource auth="Container" description="User database that can be updated and saved" factory="org.apache.catalina.users.MemoryUserDatabaseFactory" name="UserDatabase" pathname="conf/tomcat-users.xml" type="org.apache.catalina.UserDatabase"/>
+  </GlobalNamingResources>
+
+  <!-- A "Service" is a collection of one or more "Connectors" that share
+       a single "Container" Note:  A "Service" is not itself a "Container",
+       so you may not define subcomponents such as "Valves" at this level.
+       Documentation at /docs/config/service.html
+   -->
+  <Service name="Catalina">
+
+    <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+    <!--
+    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+        maxThreads="150" minSpareThreads="4"/>
+    -->
+
+
+    <!-- A "Connector" represents an endpoint by which requests are received
+         and responses are returned. Documentation at :
+         Java HTTP Connector: /docs/config/http.html
+         Java AJP  Connector: /docs/config/ajp.html
+         APR (HTTP/AJP) Connector: /docs/apr.html
+         Define a non-SSL/TLS HTTP/1.1 Connector on port 8081
+    -->
+    <Connector connectionTimeout="20000" port="8081" protocol="HTTP/1.1" redirectPort="8443"/>
+    <!-- A "Connector" using the shared thread pool-->
+    <!--
+    <Connector executor="tomcatThreadPool"
+               port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
+    -->
+    <!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443
+         This connector uses the NIO implementation. The default
+         SSLImplementation will depend on the presence of the APR/native
+         library and the useOpenSSL attribute of the AprLifecycleListener.
+         Either JSSE or OpenSSL style configuration may be used regardless of
+         the SSLImplementation selected. JSSE style configuration is used below.
+    -->
+    <!--
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+               maxThreads="150" SSLEnabled="true">
+        <SSLHostConfig>
+            <Certificate certificateKeystoreFile="conf/localhost-rsa.jks"
+                         type="RSA" />
+        </SSLHostConfig>
+    </Connector>
+    -->
+    <!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
+         This connector uses the APR/native implementation which always uses
+         OpenSSL for TLS.
+         Either JSSE or OpenSSL style configuration may be used. OpenSSL style
+         configuration is used below.
+    -->
+    <!--
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol"
+               maxThreads="150" SSLEnabled="true" >
+        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+        <SSLHostConfig>
+            <Certificate certificateKeyFile="conf/localhost-rsa-key.pem"
+                         certificateFile="conf/localhost-rsa-cert.pem"
+                         certificateChainFile="conf/localhost-rsa-chain.pem"
+                         type="RSA" />
+        </SSLHostConfig>
+    </Connector>
+    -->
+
+    <!-- Define an AJP 1.3 Connector on port 8009 -->
+    <!--
+    <Connector protocol="AJP/1.3"
+               address="::1"
+               port="8009"
+               redirectPort="8443" />
+    -->
+
+    <!-- An Engine represents the entry point (within Catalina) that processes
+         every request.  The Engine implementation for Tomcat stand alone
+         analyzes the HTTP headers included with the request, and passes them
+         on to the appropriate Host (virtual host).
+         Documentation at /docs/config/engine.html -->
+
+    <!-- You should set jvmRoute to support load-balancing via AJP ie :
+    <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+    -->
+    <Engine defaultHost="localhost" name="Catalina">
+
+      <!--For clustering, please take a look at documentation at:
+          /docs/cluster-howto.html  (simple how to)
+          /docs/config/cluster.html (reference documentation) -->
+      <!--
+      <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+      -->
+
+      <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+           via a brute-force attack -->
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <!-- This Realm uses the UserDatabase configured in the global JNDI
+             resources under the key "UserDatabase".  Any edits
+             that are performed against this UserDatabase are immediately
+             available for use by the Realm.  -->
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
+      </Realm>
+
+      <Host appBase="webapps" autoDeploy="true" name="localhost" unpackWARs="true">
+
+        <!-- SingleSignOn valve, share authentication between web applications
+             Documentation at: /docs/config/valve.html -->
+        <!--
+        <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+        -->
+
+        <!-- Access log processes all example.
+             Documentation at: /docs/config/valve.html
+             Note: The pattern used is equivalent to using pattern="common" -->
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" pattern="%h %l %u %t &quot;%r&quot; %s %b" prefix="localhost_access_log" suffix=".txt"/>
+
+      <Context docBase="Phase2-1.1-Difference between GET and POST" path="/Phase2-1.1-Difference_between_GET_and_POST" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.1-Difference between GET and POST"/><Context docBase="Phase2-1.2-Configuring_Servlet_with_Eclipse" path="/Phase2-1.2-Configuring_Servlet_with_Eclipse" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.2-Configuring_Servlet_with_Eclipse"/><Context docBase="Phase2-1.3-Generic_Servlet" path="/Phase2-1.3-Generic_Servlet" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.3-Generic_Servlet"/><Context docBase="Phase2-1.4-Servlet_Classes_Interfaces" path="/Phase2-1.4-Servlet_Classes_Interfaces" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.4-Servlet_Classes_Interfaces"/><Context docBase="Phase2-1.5-Servlet_Filters" path="/Phase2-1.5-Servlet_Filters" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.5-Servlet_Filters"/><Context docBase="Phase2-1.6-Session_Tracking_Using_Cookies" path="/Phase2-1.6-Session_Tracking_Using_Cookies" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.6-Session_Tracking_Using_Cookies"/><Context docBase="Phase2-1.7-Session_Tracking_Using_URL_Rewrite" path="/Phase2-1.7-Session_Tracking_Using_URL_Rewrite" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.7-Session_Tracking_Using_URL_Rewrite"/><Context docBase="Phase2-1.8-Session_Tracking_Using_Hidden_Forms" path="/Phase2-1.8-Session_Tracking_Using_Hidden_Forms" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.8-Session_Tracking_Using_Hidden_Forms"/><Context docBase="Phase2-1.9-Session_Tracking_Using_HTTP_Session" path="/Phase2-1.9-Session_Tracking_Using_HTTP_Session" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.9-Session_Tracking_Using_HTTP_Session"/><Context docBase="Phase2-1.10-Session_Login_Logout" path="/Phase2-1.10-Session_Login_Logout" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.10-Session_Login_Logout"/><Context docBase="Phase2-2.1-St_Up_JDBC_Environment" path="/Phase2-2.1-St_Up_JDBC_Environment" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-2.1-St_Up_JDBC_Environment"/><Context docBase="Phase2-2.2-JDBC_Connection_Statements_ResultSets" path="/Phase2-2.2-JDBC_Connection_Statements_ResultSets" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-2.2-JDBC_Connection_Statements_ResultSets"/><Context docBase="Phase2-2.3-Stored_Procedures_With_Exceptions" path="/Phase2-2.3-Stored_Procedures_With_Exceptions" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-2.3-Stored_Procedures_With_Exceptions"/><Context docBase="Phase2-2.4-Select_Creat_Drop_Database" path="/Phase2-2.4-Select_Creat_Drop_Database" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-2.4-Select_Creat_Drop_Database"/><Context docBase="Phase2-2.5-Insertion_Updation_Deletion_Database" path="/Phase2-2.5-Insertion_Updation_Deletion_Database" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-2.5-Insertion_Updation_Deletion_Database"/><Context docBase="Phase2-1.11-Validation_Of_UserLogin" path="/Phase2-1.11-Validation_Of_UserLogin" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-1.11-Validation_Of_UserLogin"/><Context docBase="Phase2-3.1-Configuration_Of_Hibernate" path="/Phase2-3.1-Configuration_Of_Hibernate" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.1-Configuration_Of_Hibernate"/><Context docBase="Phase2-3.2-Hibernate_Configuration_Using-XML_In_Eclipse" path="/Phase2-3.2-Hibernate_Configuration_Using-XML_In_Eclipse" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.2-Hibernate_Configuration_Using-XML_In_Eclipse"/><Context docBase="Phase2-3.3-Hibernate_Configuration_Using_Annotations" path="/Phase2-3.3-Hibernate_Configuration_Using_Annotations" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.3-Hibernate_Configuration_Using_Annotations"/><Context docBase="Phase2-2.6-Retriving_Product_Details_Using_ProductId" path="/Phase2-2.6-Retriving_Product_Details_Using_ProductId" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-2.6-Retriving_Product_Details_Using_ProductId"/><Context docBase="Phase2-3.4-Hibernate_Loging_By-Log4j" path="/Phase2-3.4-Hibernate_Loging_By-Log4j" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.4-Hibernate_Loging_By-Log4j"/><Context docBase="Phase2-3.5-Collection_Mapping_In_Hibernate" path="/Phase2-3.5-Collection_Mapping_In_Hibernate" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.5-Collection_Mapping_In_Hibernate"/><Context docBase="Phase2-3.6-Hibernate_lazy_Collection" path="/Phase2-3.6-Hibernate_lazy_Collection" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.6-Hibernate_lazy_Collection"/><Context docBase="Phase2-3.7-Component_Mapping" path="/Phase2-3.7-Component_Mapping" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.7-Component_Mapping"/><Context docBase="Phase2-3.8-Integration_of_Hibernate_With_Spring" path="/Phase2-3.8-Integration_of_Hibernate_With_Spring" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.8-Integration_of_Hibernate_With_Spring"/><Context docBase="Phase2-3.9-Adding_New_Product_In_Database" path="/Phase2-3.9-Adding_New_Product_In_Database" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-3.9-Adding_New_Product_In_Database"/><Context docBase="Phase2-4.1-Creating_A_Simple_JSP_Page" path="/Phase2-4.1-Creating_A_Simple_JSP_Page" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-4.1-Creating_A_Simple_JSP_Page"/><Context docBase="Phase2-4.2-JSP_Implicit_Objects" path="/Phase2-4.2-JSP_Implicit_Objects" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-4.2-JSP_Implicit_Objects"/><Context docBase="Phase2-4.3-JSP_Directives" path="/Phase2-4.3-JSP_Directives" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-4.3-JSP_Directives"/><Context docBase="Phase2-4.4-JSP_Action_Tags" path="/Phase2-4.4-JSP_Action_Tags" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-4.4-JSP_Action_Tags"/><Context docBase="Phase2-4.5-Session_Handling" path="/Phase2-4.5-Session_Handling" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-4.5-Session_Handling"/><Context docBase="Phase2-4.6-Product_Details_Portal" path="/Phase2-4.6-Product_Details_Portal" reloadable="true" source="org.eclipse.jst.jee.server:Phase2-4.6-Product_Details_Portal"/></Host>
+    </Engine>
+  </Service>
+</Server>

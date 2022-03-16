@@ -7,7 +7,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AllOperations {
+public class Locker {
 public void listAllFiles(String path) {
 		
 		if (path == null || path.isEmpty())

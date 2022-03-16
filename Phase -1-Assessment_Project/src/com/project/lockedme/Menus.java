@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class Menus {
 
 	Scanner scan = new Scanner(System.in);
-	AllOperations dao = new AllOperations();
+	Locker dao = new Locker();
 	
 	public void introScreen() {
 		System.out.println();
