@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
+	<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+		<item value="/home/yogeshtonpempha/eclipse-workspace3/Phase2-Assessment-FlyAway_An_Airline_Booking_Portal_"/>
+		<item value="/home/yogeshtonpempha/eclipse-workspace3/Phase2-Assessment-Developing_A_Backend_Admin_For_Learner_Academy"/>
+	</list>
 	<section name="CleanDialogSettings">
 		<item value="569" key="DIALOG_WIDTH"/>
 		<item value="false" key="TOGGLE_SELECTED"/>
